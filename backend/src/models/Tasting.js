@@ -1,6 +1,18 @@
 // models/Tasting.js
 import mongoose from "mongoose";
 
+const DramSchema = new mongoose.Schema({
+  order: { type: Number, required: true },
+  name: { type: String, default: "" },
+  broughtBy: { type: String, default: "" }
+}, { _id: false });
+
+const RatingSchema = new mongoose.Schema({
+  points: { type: Number, default: 50 },
+  notes: { type: String, default: "" },
+  aromas: { type: [String], default: [] }
+}, { _id: false });
+
 const TastingSchema = new mongoose.Schema({
   title: { type: String, required: true },
   host: { type: String, default: '' },
