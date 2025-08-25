@@ -1,0 +1,81 @@
+:root{
+  --cta-start:#f7c24b;
+  --cta-end:#c7772d;
+  --cta-shadow:rgba(199,119,45,.35);
+
+  --bg-dark:#121212;      /* App Hintergrund */
+  --card-dark:#1e1e1e;    /* Cards */
+  --border-dark:#2c2c2c;  /* Borders */
+  --text-light:#f1f1f1;
+  --text-muted:#a0a0a0;
+}
+
+/* Hintergrund & Textfarben global */
+html, body, #root { height:100%; }
+body, #root {
+  background: var(--bg-dark);
+  color: var(--text-light);
+}
+
+/* Container-Breite für Mobile-Layout */
+.container-mobile { max-width: 480px; }
+
+/* Cards */
+.card{
+  background: var(--card-dark);
+  border: 1px solid var(--border-dark);
+  color: var(--text-light);
+}
+.card .text-muted{ color: var(--text-muted) !important; }
+
+/* Forms */
+.form-control, .form-select, textarea{
+  background: #181818;
+  color: var(--text-light);
+  border: 1px solid var(--border-dark);
+}
+.form-control::placeholder{ color: var(--text-muted); }
+
+/* Navbar */
+.navbar{
+  background: #000 !important;
+  border-bottom: 1px solid var(--border-dark);
+}
+.navbar .navbar-brand{ font-weight:700; }
+
+/* Primäre CTA */
+.btn-cta{
+  background: linear-gradient(90deg, var(--cta-start) 0%, var(--cta-end) 100%);
+  border: none !important;
+  color: #111 !important;
+  font-weight: 700;
+  border-radius: .75rem;
+  box-shadow: 0 .5rem 1rem var(--cta-shadow);
+}
+.btn-cta:hover,
+.btn-cta:focus{
+  filter: brightness(0.95);
+  color: #111 !important;
+}
+
+/* Sekundäre CTA */
+.btn-cta-outline{
+  background: transparent;
+  border: 2px solid var(--cta-end) !important;
+  color: var(--cta-end) !important;
+  font-weight: 700;
+  border-radius: .75rem;
+}
+.btn-cta-outline:hover,
+.btn-cta-outline:focus{
+  background: linear-gradient(90deg, var(--cta-start) 0%, var(--cta-end) 100%);
+  color: #111 !important;
+}
+
+/* Sticky-Bar Hintergrund */
+.bar-gradient{
+  background: linear-gradient(180deg,
+    rgba(18,18,18,0) 0%,
+    rgba(18,18,18,0.9) 20%,
+    rgba(18,18,18,1) 100%);
+}
