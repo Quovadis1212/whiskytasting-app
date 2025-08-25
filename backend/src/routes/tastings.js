@@ -3,7 +3,7 @@ import { Router } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import Tasting from '../models/Tasting.js';
-import { generateJoinCode } from '../utils/joinCode.js';
+import { generateJoinCode } from '../utils/joincode.js';
 
 
 const router = Router();
