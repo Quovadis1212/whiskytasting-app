@@ -50,7 +50,7 @@ export default function App() {
 
   return (
     <>
-      <Header released={tasting.released} admin={admin}/>
+      <Header released={tasting.released} admin={admin} tasting={tasting}/>
       <main>
         <Routes>
           <Route path="/" element={
