@@ -3,6 +3,8 @@ import { Router } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import Tasting from '../models/Tasting.js';
+import { generateJoinCode } from '../utils/joinCode.js';
+
 
 const router = Router();
 const sign = (payload) => jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '12h' });
@@ -56,6 +58,13 @@ router.post('/', async (req, res) => {
     if (!organizerPin) return res.status(400).json({ error: 'organizerPin required' });
 
     const organizerPinHash = await bcrypt.hash(String(organizerPin), 10);
+
+    // sichere Generierung eines einzigartigen Codes
+    let joinCode;
+    do {
+      joinCode = generateJoinCode();
+    } while (await Tasting.exists({ joinCode }));
+
     const t = await Tasting.create({
       title: title || 'Blind Tasting',
       host: host || '',
@@ -64,11 +73,12 @@ router.post('/', async (req, res) => {
         order: Number(d.order),
         name: String(d.name ?? ''),
         broughtBy: String(d.broughtBy ?? '')
-      })).sort((a,b)=>a.order-b.order)
+      })),
+      joinCode
     });
 
     const token = sign({ role: 'orga', tid: String(t._id) });
-    res.status(201).json({ id: String(t._id), token });
+    res.status(201).json({ id: String(t._id), joinCode, token });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -89,29 +99,40 @@ router.post('/:id/login', async (req, res) => {
 });
 
 // Get tasting (Blindmodus beachtet)
+// Get tasting (Blindmodus beachtet) — mit joinCode-Backfill
 router.get('/:id', orgaAuthOptional, async (req, res) => {
   try {
-    const t = await Tasting.findById(req.params.id).lean();
+    let t = await Tasting.findById(req.params.id);
     if (!t) return res.status(404).json({ error: 'not found' });
 
+    // joinCode sicherstellen (Backfill für alte Tastings)
+    if (!t.joinCode) {
+        let code;
+        do { code = generateJoinCode(); } while (await Tasting.exists({ joinCode: code }));
+        t.joinCode = code;
+        await t.save();
+        t = await Tasting.findById(req.params.id).lean();
+    } else {
+        t = t.toObject();
+    }
+
     const isOrgaForThis = req.isOrga;
-    const out = {
+    res.json({
       id: String(t._id),
+      joinCode: t.joinCode || "",
       title: t.title,
       host: t.host,
       released: t.released,
       drams: (t.drams || []).map(d => {
-        if (!t.released && !isOrgaForThis) {
-          return { order: d.order, name: '', broughtBy: '' };
-        }
+        if (!t.released && !isOrgaForThis) return { order: d.order, name: '', broughtBy: '' };
         return { order: d.order, name: d.name || '', broughtBy: d.broughtBy || '' };
       })
-    };
-    res.json(out);
+    });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
 });
+
 
 // Submit/update rating (participant -> per-dram rating map)
 router.post('/:id/ratings', async (req, res) => {
@@ -136,6 +157,30 @@ router.post('/:id/ratings', async (req, res) => {
     t.ratings.set(participant, current);
     await t.save();
     res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// GET /api/tastings/code/:code
+router.get('/code/:code', orgaAuthOptional, async (req, res) => {
+  try {
+    const t = await Tasting.findOne({ joinCode: req.params.code }).lean();
+    if (!t) return res.status(404).json({ error: 'not found' });
+
+    const showResolution = t.released || req.isOrga;
+    res.json({
+      id: String(t._id),
+      joinCode: t.joinCode,
+      title: t.title,
+      host: t.host,
+      released: t.released,
+      drams: (t.drams || []).map(d => ({
+        order: d.order,
+        name: showResolution ? d.name : '',
+        broughtBy: showResolution ? d.broughtBy : ''
+      }))
+    });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
