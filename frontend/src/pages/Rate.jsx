@@ -3,9 +3,9 @@ import { Container, Card, Button, Row, Col, Form, ButtonGroup, Badge } from "rea
 import { useNavigate } from "react-router-dom";
 
 const AROMAS = [
-  "Fruity","Vanilla","Caramel","Honey","Spicy","Smoky",
-  "Peaty","Floral","Nutty","Citrus","Apple","Pear",
-  "Chocolate","Coffee","Oak","Leather","Tobacco","Mint"
+  "Fruchtig","Vanille","Karamell","Honig","Würzig","Rauchig",
+  "Torfig","Blumig","Nussig","Zitrus","Apfel","Birne",
+  "Schokolade","Kaffee","Eiche","Leder","Tabak","Minze"
 ];
 
 const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
