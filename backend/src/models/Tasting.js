@@ -1,29 +1,18 @@
-import mongoose from 'mongoose';
-
-const RatingSchema = new mongoose.Schema({
-  points: { type: Number, min: 0, max: 100, default: 50 },
-  notes: { type: String, default: '' },
-  aromas: { type: [String], default: [] }
-}, { _id: false });
-
-const DramSchema = new mongoose.Schema({
-  order: { type: Number, required: true },
-  name: { type: String, default: '' },
-  broughtBy: { type: String, default: '' }
-}, { _id: false });
+// models/Tasting.js
+import mongoose from "mongoose";
 
 const TastingSchema = new mongoose.Schema({
-  title: { type: String, required: true },
-  host: { type: String, default: '' },
-  released: { type: Boolean, default: false },
-  organizerPinHash: { type: String, required: true },
-  drams: { type: [DramSchema], default: [] },
-  ratings: {
-    type: Map,
-    of: { type: Map, of: RatingSchema },
-    default: {}
-  },
-  joinCode: { type: String, unique: true, index: true }
-}, { timestamps: true });
+  name: { type: String, required: true },
+  host: { type: String, required: true },
+  joinCode: { type: String, unique: true, index: true },
+  whiskies: [{
+    code: String,        
+    nameHidden: String,   
+    broughtBy: String
+  }],
+  isClosed: { type: Boolean, default: false },   
+  releasedAt: { type: Date, default: null },     
+  createdAt: { type: Date, default: Date.now }
+});
 
-export default mongoose.model('Tasting', TastingSchema);
+export default mongoose.model("Tasting", TastingSchema);
