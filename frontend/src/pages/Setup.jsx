@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Card, Form, Row, Col, Button, Container, InputGroup } from "react-bootstrap";
-import { createTasting, orgaLogin, setToken, toggleReleased, updateSetup } from "../api.js";
+import { createTasting, orgaLogin, setToken, toggleReleased, toggleCompleted, updateSetup } from "../api.js";
 
 export default function Setup({ tasting, setTasting, goRate, admin, setAdminState }) {
   const [title, setTitle] = useState(tasting.title || "");
@@ -55,6 +55,19 @@ export default function Setup({ tasting, setTasting, goRate, admin, setAdminStat
     finally { setBusy(false); }
   };
 
+  const handleToggleCompleted = async () => {
+    const next = !tasting.completed;
+    if (next && !confirm("Tasting als abgeschlossen markieren? Danach sind keine Änderungen mehr möglich.")) {
+      return;
+    }
+    try {
+      setBusy(true);
+      await toggleCompleted(tasting.id, next);
+      setTasting(t => ({ ...t, completed: next }));
+    } catch { alert("Konnte Status nicht ändern."); }
+    finally { setBusy(false); }
+  };
+
   const saveSetup = async () => {
     try {
       setBusy(true);
@@ -83,6 +96,7 @@ export default function Setup({ tasting, setTasting, goRate, admin, setAdminStat
         host: qsHost.trim(),
         joinCode: data.joinCode,
         released: false,
+        completed: false,
         drams: []
       }));
       setQsPIN("");
@@ -113,10 +127,19 @@ export default function Setup({ tasting, setTasting, goRate, admin, setAdminStat
                 {tasting?.id && <Button className="btn-cta" onClick={handleOrgaLogin}>Orga‑Login</Button>}
               </div>
             ) : (
-              <Button className={tasting.released ? "btn-cta-outline" : "btn-cta"}
-                      disabled={busy} onClick={handleToggleReleased}>
-                {tasting.released ? "Blindmodus aktivieren" : "Auflösung freigeben"}
-              </Button>
+              <div className="d-flex gap-2">
+                <Button className={tasting.released ? "btn-cta-outline" : "btn-cta"}
+                        disabled={busy || tasting.completed} onClick={handleToggleReleased}>
+                  {tasting.released ? "Blindmodus aktivieren" : "Auflösung freigeben"}
+                </Button>
+                <Button 
+                  className={tasting.completed ? "btn-danger" : "btn-warning"}
+                  disabled={busy} 
+                  onClick={handleToggleCompleted}
+                >
+                  {tasting.completed ? "Abgeschlossen" : "Abschließen"}
+                </Button>
+              </div>
             )}
           </div>
 
@@ -168,25 +191,33 @@ export default function Setup({ tasting, setTasting, goRate, admin, setAdminStat
               <div className="d-flex justify-content-between align-items-center mb-3">
                 <div>
                   <Card.Title className="mb-0">Tasting einrichten</Card.Title>
-                  <small className="text-muted">Titel, Orga, Drams</small>
+                  <small className="text-muted">
+                    {tasting.completed ? "Tasting abgeschlossen (nur Anzeige)" : "Titel, Orga, Drams"}
+                  </small>
                 </div>
-                <Button className="btn-cta" onClick={addDram}>+ Dram</Button>
+                {!tasting.completed && (
+                  <Button className="btn-cta" onClick={addDram}>+ Dram</Button>
+                )}
               </div>
 
               <Form>
                 <Form.Group className="mb-3">
                   <Form.Label>Tasting‑Titel</Form.Label>
-                  <Form.Control value={title} onChange={(e)=>setTitle(e.target.value)} placeholder="Blind Tasting #1"/>
+                  <Form.Control value={title} onChange={(e)=>setTitle(e.target.value)} 
+                                placeholder="Blind Tasting #1" disabled={tasting.completed}/>
                 </Form.Group>
                 <Form.Group className="mb-3">
                   <Form.Label>Organisator</Form.Label>
-                  <Form.Control value={host} onChange={(e)=>setHost(e.target.value)} placeholder="Orga‑Team"/>
+                  <Form.Control value={host} onChange={(e)=>setHost(e.target.value)} 
+                                placeholder="Orga‑Team" disabled={tasting.completed}/>
                 </Form.Group>
+                {!tasting.completed && (
                 <Form.Group className="mb-3">
                   <Form.Label>Neue Orga‑PIN setzen (optional)</Form.Label>
                   <Form.Control type="password" value={pin} onChange={(e)=>setPin(e.target.value)} placeholder="z. B. 1234"/>
                   <Form.Text className="text-muted">Beim Ändern der PIN wirst du ausgeloggt und musst dich neu anmelden.</Form.Text>
                 </Form.Group>
+                )}
               </Form>
             </Card.Body>
           </Card>
@@ -198,18 +229,21 @@ export default function Setup({ tasting, setTasting, goRate, admin, setAdminStat
                   <Col xs={4}>
                     <Form.Label>Reihenfolge</Form.Label>
                     <Form.Control type="number" min="1" value={d.order}
-                      onChange={e=>update(i,{order: parseInt(e.target.value||"0",10)})}/>
+                      onChange={e=>update(i,{order: parseInt(e.target.value||"0",10)})}
+                      disabled={tasting.completed}/>
                   </Col>
                   <Col xs={8}>
                     <Form.Label>Whisky‑Name (Auflösung)</Form.Label>
                     <Form.Control value={d.name}
                       onChange={e=>update(i,{name: e.target.value})}
-                      placeholder="erst nach Freigabe sichtbar"/>
+                      placeholder="erst nach Freigabe sichtbar"
+                      disabled={tasting.completed}/>
                   </Col>
                   <Col xs={12}>
                     <Form.Label>Mitgebracht von (Auflösung)</Form.Label>
                     <Form.Control value={d.broughtBy}
-                      onChange={e=>update(i,{broughtBy: e.target.value})}/>
+                      onChange={e=>update(i,{broughtBy: e.target.value})}
+                      disabled={tasting.completed}/>
                   </Col>
                 </Row>
               </Card.Body>
@@ -218,7 +252,11 @@ export default function Setup({ tasting, setTasting, goRate, admin, setAdminStat
 
           <div className="position-fixed bottom-0 start-0 end-0 p-2 bar-gradient">
             <div className="d-flex gap-2 mx-auto container-mobile">
-              <Button className="w-50 btn-cta-outline" disabled={busy} onClick={saveSetup}>Speichern</Button>
+              <Button className="w-50 btn-cta-outline" 
+                      disabled={busy || tasting.completed} 
+                      onClick={saveSetup}>
+                {tasting.completed ? "Abgeschlossen" : "Speichern"}
+              </Button>
               <Button className="w-50 btn-cta" onClick={goRate}>Weiter</Button>
             </div>
           </div>

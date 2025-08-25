@@ -51,6 +51,26 @@ function orgaRequired(req, res, next) {
 
 // --- Routes ----------------------------------------------------------------
 
+// List active tastings (not completed)
+router.get('/', async (req, res) => {
+  try {
+    const tastings = await Tasting.find({ completed: false })
+      .select('title host joinCode createdAt')
+      .sort({ createdAt: -1 })
+      .lean();
+    
+    res.json(tastings.map(t => ({
+      id: String(t._id),
+      title: t.title,
+      host: t.host,
+      joinCode: t.joinCode,
+      createdAt: t.createdAt
+    })));
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // Create tasting
 router.post('/', async (req, res) => {
   try {
@@ -123,6 +143,7 @@ router.get('/:id', orgaAuthOptional, async (req, res) => {
       title: t.title,
       host: t.host,
       released: t.released,
+      completed: t.completed,
       drams: (t.drams || []).map(d => {
         if (!t.released && !isOrgaForThis) return { order: d.order, name: '', broughtBy: '' };
         return { order: d.order, name: d.name || '', broughtBy: d.broughtBy || '' };
@@ -175,6 +196,7 @@ router.get('/code/:code', orgaAuthOptional, async (req, res) => {
       title: t.title,
       host: t.host,
       released: t.released,
+      completed: t.completed,
       drams: (t.drams || []).map(d => ({
         order: d.order,
         name: showResolution ? d.name : '',
@@ -268,11 +290,27 @@ router.post('/:id/released', orgaRequired, async (req, res) => {
   }
 });
 
+// Orga: toggle completed
+router.post('/:id/completed', orgaRequired, async (req, res) => {
+  try {
+    const t = await Tasting.findById(req.params.id);
+    if (!t) return res.status(404).json({ error: 'not found' });
+    t.completed = Boolean(req.body.completed);
+    await t.save();
+    res.json({ completed: t.completed });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // Orga: update setup (title/host/drams, pin)
 router.put('/:id', orgaRequired, async (req, res) => {
   try {
     const t = await Tasting.findById(req.params.id);
     if (!t) return res.status(404).json({ error: 'not found' });
+    
+    // Prevent modifications if tasting is completed
+    if (t.completed) return res.status(403).json({ error: 'tasting is completed and cannot be modified' });
 
     const { title, host, drams, organizerPin } = req.body;
     if (title !== undefined) t.title = String(title);
