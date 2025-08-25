@@ -16,6 +16,7 @@ const TastingSchema = new mongoose.Schema({
   title: { type: String, required: true },
   host: { type: String, default: '' },
   released: { type: Boolean, default: false },
+  completed: { type: Boolean, default: false },
   organizerPinHash: { type: String, required: true },
   drams: { type: [DramSchema], default: [] },
   ratings: {

@@ -24,6 +24,11 @@ export async function createTasting({ title, host, organizerPin, drams = [] }) {
 }
 
 // ---- Tastings lesen ----
+export async function fetchActiveTastings() {
+  const res = await fetch(`${API}/api/tastings`);
+  if (!res.ok) throw new Error(`fetch active tastings ${res.status}`);
+  return res.json();
+}
 export async function fetchTastingByCode(code) {
   const res = await fetch(`${API}/api/tastings/code/${encodeURIComponent(code)}`, {
     headers: authHeader()
@@ -56,6 +61,15 @@ export async function toggleReleased(tastingId, released) {
     body: JSON.stringify({ released })
   });
   if (!res.ok) throw new Error(`toggle released ${res.status}`);
+  return res.json();
+}
+export async function toggleCompleted(tastingId, completed) {
+  const res = await fetch(`${API}/api/tastings/${tastingId}/completed`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeader() },
+    body: JSON.stringify({ completed })
+  });
+  if (!res.ok) throw new Error(`toggle completed ${res.status}`);
   return res.json();
 }
 export async function updateSetup(tastingId, payload) {
