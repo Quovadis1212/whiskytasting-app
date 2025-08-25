@@ -44,7 +44,7 @@ export default function Home({ setTasting, participant, setParticipant }) {
       setError("");
       const data = await fetchTastingByCode(joinCode.trim());
       setTasting(data);
-      nav(`/?c=${joinCode.trim()}`);
+      nav(`/rate?c=${joinCode.trim()}`);
     } catch (err) {
       console.error('Failed to join tasting:', err);
       setError("Tasting nicht gefunden oder Code ungültig.");
@@ -58,7 +58,7 @@ export default function Home({ setTasting, participant, setParticipant }) {
       setError("Bitte erst Namen eingeben.");
       return;
     }
-    nav(`/?c=${code}`);
+    nav(`/rate?c=${code}`);
   };
 
   const formatDate = (dateStr) => {
