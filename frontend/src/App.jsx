@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import Header from "./components/Header.jsx";
 import Footer from "./components/Footer.jsx";
+import Home from "./pages/Home.jsx";
 import Setup from "./pages/Setup.jsx";
 import Rate from "./pages/Rate.jsx";
 import Leaderboard from "./pages/Leaderboard.jsx";
@@ -13,6 +14,7 @@ const emptyTasting = {
   title: "Whisky Tasting",
   host: "",
   released: false,
+  completed: false,
   joinCode: "",
   drams: [],
   ratings: {} // nur lokal für UI
@@ -52,6 +54,16 @@ export default function App() {
       <main>
         <Routes>
           <Route path="/" element={
+            tasting.id ? (
+              <Setup tasting={tasting} setTasting={setTasting}
+                     goRate={()=>nav("/rate")}
+                     admin={admin} setAdminState={setAdminState}/>
+            ) : (
+              <Home setTasting={setTasting} 
+                    participant={participant} setParticipant={setParticipant}/>
+            )
+          }/>
+          <Route path="/setup" element={
             <Setup tasting={tasting} setTasting={setTasting}
                    goRate={()=>nav("/rate")}
                    admin={admin} setAdminState={setAdminState}/>
