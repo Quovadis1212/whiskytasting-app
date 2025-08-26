@@ -59,6 +59,10 @@ export default function Home({ setTasting, participant, setParticipant }) {
       setJoining(true);
       setError("");
       const data = await fetchTastingByCode(joinCode.trim());
+      // Prüfe, ob Bewertungen für diesen Teilnehmer existieren und speichere sie ggf. im localStorage
+      if (data.ratings && data.ratings[participant]) {
+        localStorage.setItem(`wt_ratings_${data.id}_${participant}`, JSON.stringify(data.ratings[participant]));
+      }
       setTasting(data);
       nav(`/rate?c=${joinCode.trim()}`);
     } catch (err) {
@@ -69,12 +73,26 @@ export default function Home({ setTasting, participant, setParticipant }) {
     }
   };
 
-  const joinTasting = (code) => {
+  const joinTasting = async (code) => {
     if (!participant.trim()) {
       setError("Bitte erst Namen eingeben.");
       return;
     }
-    nav(`/rate?c=${code}`);
+    try {
+      setJoining(true);
+      setError("");
+      const data = await fetchTastingByCode(code.trim());
+      if (data.ratings && data.ratings[participant]) {
+        localStorage.setItem(`wt_ratings_${data.id}_${participant}`, JSON.stringify(data.ratings[participant]));
+      }
+      setTasting(data);
+      nav(`/rate?c=${code.trim()}`);
+    } catch (err) {
+      console.error('Failed to join tasting:', err);
+      setError("Tasting nicht gefunden oder Code ungültig.");
+    } finally {
+      setJoining(false);
+    }
   };
 
   const formatDate = (dateStr) => {
@@ -93,53 +111,7 @@ export default function Home({ setTasting, participant, setParticipant }) {
         <Col lg={8}>
           <h1 className="text-center mb-4">Whisky Tasting</h1>
           
-          {/* Join by Code Form */}
-          <Card className="mb-4 shadow-sm">
-            <Card.Body>
-              <Card.Title>Tasting beitreten</Card.Title>
-              {error && <Alert variant="danger">{error}</Alert>}
-              <Form onSubmit={handleJoinByCode}>
-                <Row className="g-2">
-                  <Col sm={6}>
-                    <Form.Label>Dein Name</Form.Label>
-                    <Form.Control
-                      type="text"
-                      value={participant}
-                      onChange={(e) => {
-                        setParticipant(e.target.value);
-                        setError("");
-                      }}
-                      placeholder="Name eingeben"
-                      required
-                    />
-                  </Col>
-                  <Col sm={4}>
-                    <Form.Label>Tasting-Code</Form.Label>
-                    <Form.Control
-                      type="text"
-                      value={joinCode}
-                      onChange={(e) => {
-                        setJoinCode(e.target.value.toUpperCase());
-                        setError("");
-                      }}
-                      placeholder="z.B. ABC123"
-                      required
-                    />
-                  </Col>
-                  <Col sm={2} className="d-flex align-items-end">
-                    <Button
-                      type="submit"
-                      className="btn-cta"
-                      style={{ height: 'fit-content', alignSelf: 'flex-end' }}
-                      disabled={joining}
-                    >
-                      {joining ? "..." : "Beitreten"}
-                    </Button>
-                  </Col>
-                </Row>
-              </Form>
-            </Card.Body>
-          </Card>
+
 
           {/* Active Tastings List */}
           <Card className="shadow-sm mb-4">
@@ -172,12 +144,30 @@ export default function Home({ setTasting, participant, setParticipant }) {
                             </small>
                           </Col>
                           <Col xs="auto">
-                            <code className="me-2">{tasting.joinCode}</code>
                             <Button
                               size="sm"
                               className="btn-cta-outline"
-                              onClick={() => joinTasting(tasting.joinCode)}
-                              disabled={!participant.trim()}
+                              onClick={async () => {
+                                const name = window.prompt("Dein Name für die Bewertung:", "");
+                                if (!name || !name.trim()) return;
+                                setParticipant(name.trim());
+                                try {
+                                  setJoining(true);
+                                  setError("");
+                                  const data = await fetchTastingByCode(tasting.joinCode.trim());
+                                  // Bewertungen für diesen Teilnehmer laden und speichern
+                                  if (data.ratings && data.ratings[name.trim()]) {
+                                    localStorage.setItem(`wt_ratings_${data.id}_${name.trim()}`, JSON.stringify(data.ratings[name.trim()]));
+                                  }
+                                  setTasting(data);
+                                  nav(`/rate?c=${tasting.joinCode.trim()}`);
+                                } catch (err) {
+                                  console.error('Failed to join tasting:', err);
+                                  setError("Tasting nicht gefunden oder Code ungültig.");
+                                } finally {
+                                  setJoining(false);
+                                }
+                              }}
                             >
                               Beitreten
                             </Button>

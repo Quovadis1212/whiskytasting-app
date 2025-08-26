@@ -1,8 +1,10 @@
 import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, Form, Row, Col, Button, Container, InputGroup } from "react-bootstrap";
 import { createTasting, orgaLogin, setToken, toggleReleased, toggleCompleted, updateSetup } from "../api.js";
 
 export default function Setup({ tasting, setTasting, goRate, admin, setAdminState }) {
+  const navigate = useNavigate();
   const [title, setTitle] = useState(tasting.title || "");
   const [host,  setHost]  = useState(tasting.host || "");
   const [pin,   setPin]   = useState(""); // neue PIN setzen (optional bei Update)
@@ -114,14 +116,16 @@ export default function Setup({ tasting, setTasting, goRate, admin, setAdminStat
       <Card className="mb-3 shadow-sm">
         <Card.Body>
           <div className="d-flex justify-content-between align-items-center mb-2">
-            <div>
-              <Card.Title className="mb-0">Orga</Card.Title>
-              <small className="text-muted">Login & Steuerung</small>
-            </div>
 
             {!admin || !tasting?.id ? (
               <div className="d-flex gap-2">
-                <Button className="btn-cta-outline" onClick={()=>setQsOpen(v=>!v)}>
+                <Button className="btn-cta-outline" onClick={() => {
+                  if (qsOpen) {
+                    navigate("/");
+                  } else {
+                    setQsOpen(true);
+                  }
+                }}>
                   {qsOpen ? "Schließen" : "Neues Tasting starten"}
                 </Button>
                 {tasting?.id && <Button className="btn-cta" onClick={handleOrgaLogin}>Orga‑Login</Button>}

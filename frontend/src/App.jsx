@@ -58,19 +58,15 @@ export default function App() {
 
   return (
     <>
-      <Header released={tasting.released} admin={admin} tasting={tasting} onLeaveTasting={handleLeaveTasting}/>
+      {loc.pathname !== "/" && (
+        <Header released={tasting.released} admin={admin} tasting={tasting} onLeaveTasting={handleLeaveTasting}/>
+      )}
       <main>
         <Routes>
           <Route path="/" element={
-            tasting.id ? (
-              <Setup tasting={tasting} setTasting={setTasting}
-                     goRate={()=>nav("/rate")}
-                     admin={admin} setAdminState={setAdminState}/>
-            ) : (
-              <Home setTasting={setTasting} 
-                    participant={participant} setParticipant={setParticipant}
-                    currentTasting={tasting}/>
-            )
+            <Home setTasting={setTasting} 
+                  participant={participant} setParticipant={setParticipant}
+                  currentTasting={tasting}/>
           }/>
           <Route path="/setup" element={
             <Setup tasting={tasting} setTasting={setTasting}
