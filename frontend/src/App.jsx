@@ -29,6 +29,14 @@ export default function App() {
 
   useEffect(()=>localStorage.setItem("wt_participant", participant), [participant]);
 
+  // Function to leave current tasting
+  const handleLeaveTasting = () => {
+    setTasting(emptyTasting);
+    nav("/");
+  };
+
+  useEffect(()=>localStorage.setItem("wt_participant", participant), [participant]);
+
   // Tasting anhand ?c=CODE oder ?t=ID laden
   useEffect(() => {
     const qs = new URLSearchParams(loc.search);
@@ -50,7 +58,7 @@ export default function App() {
 
   return (
     <>
-      <Header released={tasting.released} admin={admin} tasting={tasting}/>
+      <Header released={tasting.released} admin={admin} tasting={tasting} onLeaveTasting={handleLeaveTasting}/>
       <main>
         <Routes>
           <Route path="/" element={
@@ -60,7 +68,8 @@ export default function App() {
                      admin={admin} setAdminState={setAdminState}/>
             ) : (
               <Home setTasting={setTasting} 
-                    participant={participant} setParticipant={setParticipant}/>
+                    participant={participant} setParticipant={setParticipant}
+                    currentTasting={tasting}/>
             )
           }/>
           <Route path="/setup" element={

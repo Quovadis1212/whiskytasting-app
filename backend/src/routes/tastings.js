@@ -71,6 +71,26 @@ router.get('/', async (req, res) => {
   }
 });
 
+// List completed tastings
+router.get('/completed', async (req, res) => {
+  try {
+    const tastings = await Tasting.find({ completed: true })
+      .select('title host joinCode createdAt')
+      .sort({ createdAt: -1 })
+      .lean();
+    
+    res.json(tastings.map(t => ({
+      id: String(t._id),
+      title: t.title,
+      host: t.host,
+      joinCode: t.joinCode,
+      createdAt: t.createdAt
+    })));
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // Create tasting
 router.post('/', async (req, res) => {
   try {

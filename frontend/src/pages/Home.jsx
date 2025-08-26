@@ -1,18 +1,21 @@
 import { useState, useEffect } from "react";
 import { Container, Card, Row, Col, Button, Form, Alert } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import { fetchActiveTastings, fetchTastingByCode } from "../api.js";
+import { fetchActiveTastings, fetchCompletedTastings, fetchTastingByCode } from "../api.js";
 
 export default function Home({ setTasting, participant, setParticipant }) {
   const [activeTastings, setActiveTastings] = useState([]);
+  const [completedTastings, setCompletedTastings] = useState([]);
   const [joinCode, setJoinCode] = useState("");
   const [loading, setLoading] = useState(true);
+  const [loadingCompleted, setLoadingCompleted] = useState(true);
   const [joining, setJoining] = useState(false);
   const [error, setError] = useState("");
   const nav = useNavigate();
 
   useEffect(() => {
     loadActiveTastings();
+    loadCompletedTastings();
   }, []);
 
   const loadActiveTastings = async () => {
@@ -25,6 +28,19 @@ export default function Home({ setTasting, participant, setParticipant }) {
       setError("Konnte aktive Tastings nicht laden.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadCompletedTastings = async () => {
+    try {
+      setLoadingCompleted(true);
+      const tastings = await fetchCompletedTastings();
+      setCompletedTastings(tastings);
+    } catch (err) {
+      console.error('Failed to load completed tastings:', err);
+      // Don't set error for completed tastings, just log it
+    } finally {
+      setLoadingCompleted(false);
     }
   };
 
@@ -113,7 +129,8 @@ export default function Home({ setTasting, participant, setParticipant }) {
                   <Col sm={2} className="d-flex align-items-end">
                     <Button
                       type="submit"
-                      className="btn-cta w-100"
+                      className="btn-cta"
+                      style={{ height: 'fit-content', alignSelf: 'flex-end' }}
                       disabled={joining}
                     >
                       {joining ? "..." : "Beitreten"}
@@ -125,7 +142,7 @@ export default function Home({ setTasting, participant, setParticipant }) {
           </Card>
 
           {/* Active Tastings List */}
-          <Card className="shadow-sm">
+          <Card className="shadow-sm mb-4">
             <Card.Body>
               <div className="d-flex justify-content-between align-items-center mb-3">
                 <Card.Title className="mb-0">Aktive Tastings</Card.Title>
@@ -163,6 +180,45 @@ export default function Home({ setTasting, participant, setParticipant }) {
                               disabled={!participant.trim()}
                             >
                               Beitreten
+                            </Button>
+                          </Col>
+                        </Row>
+                      </Card.Body>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </Card.Body>
+          </Card>
+
+          {/* Completed Tastings List */}
+          <Card className="shadow-sm">
+            <Card.Body>
+              <Card.Title className="mb-3">Abgeschlossene Tastings</Card.Title>
+
+              {loadingCompleted ? (
+                <p className="text-muted">Lade abgeschlossene Tastings...</p>
+              ) : completedTastings.length === 0 ? (
+                <p className="text-muted">Keine abgeschlossenen Tastings vorhanden.</p>
+              ) : (
+                <div className="d-grid gap-2">
+                  {completedTastings.map((tasting) => (
+                    <Card key={tasting.id} className="border">
+                      <Card.Body className="py-2">
+                        <Row className="align-items-center">
+                          <Col>
+                            <h6 className="mb-1">{tasting.title}</h6>
+                            <small className="text-muted">
+                              von {tasting.host || "Unbekannt"} • {formatDate(tasting.createdAt)}
+                            </small>
+                          </Col>
+                          <Col xs="auto">
+                            <Button
+                              size="sm"
+                              variant="outline-info"
+                              onClick={() => nav(`/board?t=${tasting.id}`)}
+                            >
+                              Rangliste
                             </Button>
                           </Col>
                         </Row>
