@@ -12,9 +12,9 @@ export default function Header({ released, admin, tasting, onLeaveTasting }) {
           WhiskyTasting
         </Navbar.Brand>
         <Nav className="me-auto">
-          {tasting?.id && <Nav.Link as={Link} to="/rate">Bewertung</Nav.Link>}
-          {tasting?.id && <Nav.Link as={Link} to="/board">Rangliste</Nav.Link>}
-          {admin && <Nav.Link as={Link} to="/setup">Setup</Nav.Link>}
+    {tasting?.id && <Nav.Link as={Link} to="/rate">Bewertung</Nav.Link>}
+    {tasting?.id && released && <Nav.Link as={Link} to="/board">Rangliste</Nav.Link>}
+    {admin && released && <Nav.Link as={Link} to="/setup">Setup</Nav.Link>}
           {tasting?.id && !admin && (
             <>
               <Nav.Link onClick={() => {
@@ -31,11 +31,7 @@ export default function Header({ released, admin, tasting, onLeaveTasting }) {
             </>
           )}
         </Nav>
-        {showBadge && released && (
-          <Badge bg="success">
-            Freigegeben
-          </Badge>
-        )}
+
       </Container>
     </Navbar>
   );

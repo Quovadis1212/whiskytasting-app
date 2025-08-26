@@ -19,19 +19,8 @@ export default function Rate({ tasting, setTasting, participant, setParticipant,
   const current = drams[idx];
 
   // lokale Ratings (nur für UI); Server ist Quelle der Wahrheit für Leaderboard
-  // Ratings aus localStorage laden, falls vorhanden
-  const [local, setLocal] = useState(() => {
-    const key = `wt_ratings_${tasting.id}_${participant}`;
-    const stored = localStorage.getItem(key);
-    if (stored) return JSON.parse(stored);
-    return tasting.ratings?.[participant] || {};
-  });
-  useEffect(() => {
-    const key = `wt_ratings_${tasting.id}_${participant}`;
-    const stored = localStorage.getItem(key);
-    if (stored) setLocal(JSON.parse(stored));
-    else setLocal(tasting.ratings?.[participant] || {});
-  }, [participant, tasting.id, tasting.ratings]);
+  const [local, setLocal] = useState(tasting.ratings?.[participant] || {});
+  useEffect(() => { setLocal(tasting.ratings?.[participant] || {}); }, [participant, tasting.ratings]);
 
   const getR = (order) => local[order] || { points: 50, notes: "", aromas: [] };
   const setR = (order, patch) =>
@@ -48,10 +37,6 @@ export default function Rate({ tasting, setTasting, participant, setParticipant,
     if (!participant.trim()) return;
     // lokal
     setTasting(t => ({ ...t, ratings: { ...t.ratings, [participant.trim()]: local }}));
-    // auch im localStorage speichern
-    if (tasting.id && participant.trim()) {
-      localStorage.setItem(`wt_ratings_${tasting.id}_${participant.trim()}`, JSON.stringify(local));
-    }
 
     // an Server senden
     if (tasting.id) {
