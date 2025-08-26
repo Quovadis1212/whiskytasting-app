@@ -1,8 +1,10 @@
 import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, Form, Row, Col, Button, Container, InputGroup } from "react-bootstrap";
 import { createTasting, orgaLogin, setToken, toggleReleased, toggleCompleted, updateSetup } from "../api.js";
 
 export default function Setup({ tasting, setTasting, goRate, admin, setAdminState }) {
+  const navigate = useNavigate();
   const [title, setTitle] = useState(tasting.title || "");
   const [host,  setHost]  = useState(tasting.host || "");
   const [pin,   setPin]   = useState(""); // neue PIN setzen (optional bei Update)
@@ -101,7 +103,8 @@ export default function Setup({ tasting, setTasting, goRate, admin, setAdminStat
       }));
       setQsPIN("");
       setQsOpen(false);
-      alert("Neues Tasting erstellt. Du bist als Orga eingeloggt.");
+      // Direkt zur vollständigen Setup-Seite navigieren
+      navigate(`/setup?t=${data.id}`);
     } catch (err) {
       console.error(err);
       alert("Tasting konnte nicht erstellt werden.");
@@ -113,35 +116,33 @@ export default function Setup({ tasting, setTasting, goRate, admin, setAdminStat
       {/* ORGA-PANEL */}
       <Card className="mb-3 shadow-sm">
         <Card.Body>
-          <div className="d-flex justify-content-between align-items-center mb-2">
-            <div>
-              <Card.Title className="mb-0">Orga</Card.Title>
-              <small className="text-muted">Login & Steuerung</small>
+          {/* Orga-Panel Buttons, ohne Titel und Beschreibung */}
+            {/* Entfernt: Orga Login & Steuerung */}
+            <div className="d-flex justify-content-end align-items-center mb-2">
+              {!admin || !tasting?.id ? (
+                <div className="d-flex gap-2">
+                  <Button className="btn-cta-outline" size="sm" onClick={()=>setQsOpen(v=>!v)}>
+                    {qsOpen ? "Schließen" : "Neues Tasting starten"}
+                  </Button>
+                  {tasting?.id && <Button className="btn-cta" size="sm" onClick={handleOrgaLogin}>Orga‑Login</Button>}
+                </div>
+              ) : (
+                <div className="d-flex gap-2">
+                  <Button className={tasting.released ? "btn-cta-outline" : "btn-cta"}
+                          disabled={busy || tasting.completed} onClick={handleToggleReleased} size="sm">
+                    {tasting.released ? "Blindmodus aktivieren" : "Auflösung freigeben"}
+                  </Button>
+                  <Button 
+                    className="btn-cta"
+                    disabled={busy} 
+                    onClick={handleToggleCompleted}
+                    size="sm"
+                  >
+                    {tasting.completed ? "Abgeschliessen" : "Abschliessen"}
+                  </Button>
+                </div>
+              )}
             </div>
-
-            {!admin || !tasting?.id ? (
-              <div className="d-flex gap-2">
-                <Button className="btn-cta-outline" onClick={()=>setQsOpen(v=>!v)}>
-                  {qsOpen ? "Schließen" : "Neues Tasting starten"}
-                </Button>
-                {tasting?.id && <Button className="btn-cta" onClick={handleOrgaLogin}>Orga‑Login</Button>}
-              </div>
-            ) : (
-              <div className="d-flex gap-2">
-                <Button className={tasting.released ? "btn-cta-outline" : "btn-cta"}
-                        disabled={busy || tasting.completed} onClick={handleToggleReleased}>
-                  {tasting.released ? "Blindmodus aktivieren" : "Auflösung freigeben"}
-                </Button>
-                <Button 
-                  className={tasting.completed ? "btn-danger" : "btn-warning"}
-                  disabled={busy} 
-                  onClick={handleToggleCompleted}
-                >
-                  {tasting.completed ? "Abgeschlossen" : "Abschließen"}
-                </Button>
-              </div>
-            )}
-          </div>
 
           {/* NEW: Quick Start Form */}
           {qsOpen && (!admin || !tasting?.id) && (

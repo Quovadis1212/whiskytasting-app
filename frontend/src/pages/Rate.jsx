@@ -52,7 +52,18 @@ export default function Rate({ tasting, setTasting, participant, setParticipant,
   const prev = () => setIdx(i => clamp(i - 1, 0, drams.length - 1));
   const next = () => setIdx(i => clamp(i + 1, 0, drams.length - 1));
 
-  const headline = current ? `Dram ${current.order}` : "";
+  let headline = "";
+  let broughtBy = "";
+  if (current) {
+    if (tasting.released && current.name) {
+      headline = current.name;
+      if (current.broughtBy) {
+        broughtBy = `mitgebracht von ${current.broughtBy}`;
+      }
+    } else {
+      headline = `Dram ${current.order}`;
+    }
+  }
 
   return (
     <Container className="py-3 container-mobile">
@@ -67,6 +78,9 @@ export default function Rate({ tasting, setTasting, participant, setParticipant,
         <Button variant="outline-secondary" size="sm" onClick={prev} disabled={idx===0}>←</Button>
         <div className="text-center">
           <div className="fw-bold">{headline}</div>
+          {broughtBy && (
+            <div className="text-muted small">{broughtBy}</div>
+          )}
           <small className="text-muted">{idx+1} von {drams.length}</small>
           {!tasting.released && (
             <div className="mt-1">
@@ -125,12 +139,9 @@ export default function Rate({ tasting, setTasting, participant, setParticipant,
       </Card>
 
       <div className="position-fixed bottom-0 start-0 end-0 p-2 bar-gradient">
-        <div className="mx-auto container-mobile d-flex gap-2">
-          <Button className="w-50 btn-cta" disabled={!participant.trim()} onClick={save}>
+        <div className="mx-auto container-mobile d-flex">
+          <Button className="w-100 btn-cta" disabled={!participant.trim()} onClick={save}>
             🔒 Bewertung speichern
-          </Button>
-          <Button className="w-50 btn-cta-outline" onClick={()=>nav("/board")}>
-            Zur Auflösung
           </Button>
         </div>
       </div>

@@ -21,7 +21,7 @@ const PORT = process.env.PORT || 4000;
 mongoose.connect(process.env.MONGO_URI, { dbName: 'whiskytasting' })
   .then(() => {
     console.log('MongoDB connected');
-    app.listen(PORT, () => console.log(`API on http://localhost:${PORT}`));
+    app.listen(PORT, '0.0.0.0', () => console.log(`API on http://localhost:${PORT}`));
   })
   .catch(err => {
     console.error('Mongo connection error:', err.message);

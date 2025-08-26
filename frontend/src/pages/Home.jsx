@@ -70,9 +70,14 @@ export default function Home({ setTasting, participant, setParticipant }) {
   };
 
   const joinTasting = (code) => {
-    if (!participant.trim()) {
-      setError("Bitte erst Namen eingeben.");
-      return;
+    let name = participant;
+    if (!name || !name.trim()) {
+      name = window.prompt("Bitte gib deinen Namen ein:");
+      if (!name || !name.trim()) {
+        setError("Bitte erst Namen eingeben.");
+        return;
+      }
+      setParticipant(name);
     }
     nav(`/rate?c=${code}`);
   };
@@ -93,53 +98,7 @@ export default function Home({ setTasting, participant, setParticipant }) {
         <Col lg={8}>
           <h1 className="text-center mb-4">Whisky Tasting</h1>
           
-          {/* Join by Code Form */}
-          <Card className="mb-4 shadow-sm">
-            <Card.Body>
-              <Card.Title>Tasting beitreten</Card.Title>
-              {error && <Alert variant="danger">{error}</Alert>}
-              <Form onSubmit={handleJoinByCode}>
-                <Row className="g-2">
-                  <Col sm={6}>
-                    <Form.Label>Dein Name</Form.Label>
-                    <Form.Control
-                      type="text"
-                      value={participant}
-                      onChange={(e) => {
-                        setParticipant(e.target.value);
-                        setError("");
-                      }}
-                      placeholder="Name eingeben"
-                      required
-                    />
-                  </Col>
-                  <Col sm={4}>
-                    <Form.Label>Tasting-Code</Form.Label>
-                    <Form.Control
-                      type="text"
-                      value={joinCode}
-                      onChange={(e) => {
-                        setJoinCode(e.target.value.toUpperCase());
-                        setError("");
-                      }}
-                      placeholder="z.B. ABC123"
-                      required
-                    />
-                  </Col>
-                  <Col sm={2} className="d-flex align-items-end">
-                    <Button
-                      type="submit"
-                      className="btn-cta"
-                      style={{ height: 'fit-content', alignSelf: 'flex-end' }}
-                      disabled={joining}
-                    >
-                      {joining ? "..." : "Beitreten"}
-                    </Button>
-                  </Col>
-                </Row>
-              </Form>
-            </Card.Body>
-          </Card>
+
 
           {/* Active Tastings List */}
           <Card className="shadow-sm mb-4">
@@ -172,12 +131,11 @@ export default function Home({ setTasting, participant, setParticipant }) {
                             </small>
                           </Col>
                           <Col xs="auto">
-                            <code className="me-2">{tasting.joinCode}</code>
                             <Button
                               size="sm"
                               className="btn-cta-outline"
                               onClick={() => joinTasting(tasting.joinCode)}
-                              disabled={!participant.trim()}
+                              // Button immer aktiv
                             >
                               Beitreten
                             </Button>
