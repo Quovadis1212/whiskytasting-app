@@ -29,6 +29,11 @@ export async function fetchActiveTastings() {
   if (!res.ok) throw new Error(`fetch active tastings ${res.status}`);
   return res.json();
 }
+export async function fetchCompletedTastings() {
+  const res = await fetch(`${API}/api/tastings/completed`);
+  if (!res.ok) throw new Error(`fetch completed tastings ${res.status}`);
+  return res.json();
+}
 export async function fetchTastingByCode(code) {
   const res = await fetch(`${API}/api/tastings/code/${encodeURIComponent(code)}`, {
     headers: authHeader()
