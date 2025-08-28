@@ -4,9 +4,9 @@ import { useNavigate } from "react-router-dom";
 import { submitRatings } from "../api.js";
 
 const AROMAS = [
-  "Fruity","Vanilla","Caramel","Honey","Spicy","Smoky",
-  "Peaty","Floral","Nutty","Citrus","Apple","Pear",
-  "Chocolate","Coffee","Oak","Leather","Tobacco","Mint"
+  "Fruchtig", "Vanille", "Karamell", "Honig", "Würzig", "Rauchig",
+  "Torf", "Blumig", "Nussig", "Zitrus", "Obst",
+  "Schokolade", "Kaffee", "Eiche", "Leder", "Tabak", "Minze"
 ];
 
 const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
