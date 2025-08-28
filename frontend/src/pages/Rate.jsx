@@ -19,13 +19,45 @@ export default function Rate({ tasting, setTasting, participant, setParticipant 
   const current = drams[idx];
 
   // lokale Ratings (nur für UI); Server ist Quelle der Wahrheit für Leaderboard
-  const [local, setLocal] = useState(tasting.ratings?.[participant] || {});
-  useEffect(() => {
-    // Wenn Ratings für diesen Teilnehmer existieren, lade sie in die Maske
-    if (tasting.ratings && participant && tasting.ratings[participant]) {
-      setLocal(tasting.ratings[participant]);
+
+  // Lokale Ratings persistent und zuverlässig laden/speichern
+  const LOCAL_RATINGS_KEY = `wt_ratings_${tasting.id}_${participant}`;
+  const [local, setLocal] = useState(() => {
+    // 1. Try localStorage (in case of reload)
+    if (tasting.id && participant) {
+      try {
+        const raw = localStorage.getItem(LOCAL_RATINGS_KEY);
+        if (raw) return JSON.parse(raw);
+      } catch {}
     }
-  }, [participant, tasting.ratings]);
+    // 2. Fallback to tasting.ratings
+    return (tasting.ratings?.[participant]) || {};
+  });
+
+  // Keep local ratings in sync with tasting/participant changes
+  useEffect(() => {
+    if (tasting.id && participant) {
+      // If tasting.ratings has changed for this participant, update local
+      const tRatings = tasting.ratings?.[participant] || {};
+      setLocal(prev => {
+        // Only update if different (avoid overwriting unsaved local edits)
+        if (JSON.stringify(prev) !== JSON.stringify(tRatings)) {
+          return tRatings;
+        }
+        return prev;
+      });
+    } else {
+      setLocal({});
+    }
+    // eslint-disable-next-line
+  }, [tasting.id, tasting.ratings, participant]);
+
+  // Persist local ratings to localStorage on change
+  useEffect(() => {
+    if (tasting.id && participant) {
+      localStorage.setItem(LOCAL_RATINGS_KEY, JSON.stringify(local));
+    }
+  }, [local, tasting.id, participant]);
 
   const getR = (order) => local[order] || { points: 50, notes: "", aromas: [] };
   const setR = (order, patch) =>
