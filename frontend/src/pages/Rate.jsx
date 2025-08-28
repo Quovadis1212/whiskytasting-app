@@ -88,12 +88,8 @@ export default function Rate({ tasting, setTasting, participant, setParticipant,
           {broughtBy && (
             <div className="text-muted small">{broughtBy}</div>
           )}
-          <small className="text-muted">{idx+1} von {drams.length}</small>
-          {!tasting.released && (
-            <div className="mt-1">
-              <Badge bg={admin ? "info" : "secondary"}>{admin ? "Orga‑Preview" : "Blindmodus"}</Badge>
-            </div>
-          )}
+          <div className="text-muted small">{idx+1} von {drams.length}</div>
+          {/* Blindmodus-Badge entfernt */}
         </div>
         <Button variant="outline-secondary" size="sm" onClick={next} disabled={idx===drams.length-1}>→</Button>
       </div>
