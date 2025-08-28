@@ -11,6 +11,7 @@ export default function Setup({ tasting, setTasting, goRate, admin, setAdminStat
   const [drams, setDrams] = useState([...(tasting.drams || [])].sort((a,b)=>a.order-b.order));
   const [copied, setCopied] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   // Quick-Start Form (nur sichtbar wenn noch kein Admin/kein gültiges Tasting geladen)
   const [qsOpen, setQsOpen] = useState(!admin || !tasting?.id);
@@ -78,8 +79,13 @@ export default function Setup({ tasting, setTasting, goRate, admin, setAdminStat
       await updateSetup(tasting.id, payload);
       setTasting(t => ({ ...t, title, host, drams: [...drams].sort((a,b)=>a.order-b.order) }));
       if (pin) { setToken(""); setAdminState(false); alert("PIN geändert. Bitte erneut einloggen."); }
-    } catch { alert("Setup speichern fehlgeschlagen."); }
-    finally { setBusy(false); }
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } catch {
+      alert("Setup speichern fehlgeschlagen.");
+    } finally {
+      setBusy(false);
+    }
   };
 
   // --- NEW: Quick Start handler ---
@@ -101,6 +107,8 @@ export default function Setup({ tasting, setTasting, goRate, admin, setAdminStat
         completed: false,
         drams: []
       }));
+      setTitle(qsTitle.trim());
+      setHost(qsHost.trim());
       setQsPIN("");
       setQsOpen(false);
       // Direkt zur vollständigen Setup-Seite navigieren
@@ -121,10 +129,12 @@ export default function Setup({ tasting, setTasting, goRate, admin, setAdminStat
             <div className="d-flex justify-content-end align-items-center mb-2">
               {!admin || !tasting?.id ? (
                 <div className="d-flex gap-2">
-                  <Button className="btn-cta-outline" size="sm" onClick={()=>setQsOpen(v=>!v)}>
+                  <Button className="btn-cta-outline" size="sm" onClick={() => {
+                    if (qsOpen) navigate("/");
+                    else setQsOpen(true);
+                  }}>
                     {qsOpen ? "Schließen" : "Neues Tasting starten"}
                   </Button>
-                  {tasting?.id && <Button className="btn-cta" size="sm" onClick={handleOrgaLogin}>Orga‑Login</Button>}
                 </div>
               ) : (
                 <div className="d-flex gap-2">
@@ -138,7 +148,7 @@ export default function Setup({ tasting, setTasting, goRate, admin, setAdminStat
                     onClick={handleToggleCompleted}
                     size="sm"
                   >
-                    {tasting.completed ? "Abgeschliessen" : "Abschliessen"}
+                    {tasting.completed ? "Abgeschlossen" : "Abschliessen"}
                   </Button>
                 </div>
               )}
@@ -252,13 +262,13 @@ export default function Setup({ tasting, setTasting, goRate, admin, setAdminStat
           ))}
 
           <div className="position-fixed bottom-0 start-0 end-0 p-2 bar-gradient">
-            <div className="d-flex gap-2 mx-auto container-mobile">
-              <Button className="w-50 btn-cta-outline" 
+            <div className="d-flex flex-column gap-2 mx-auto container-mobile align-items-center">
+              <Button className="w-100 btn-cta" 
                       disabled={busy || tasting.completed} 
                       onClick={saveSetup}>
                 {tasting.completed ? "Abgeschlossen" : "Speichern"}
               </Button>
-              <Button className="w-50 btn-cta" onClick={goRate}>Weiter</Button>
+              {saved && <div className="text-success fw-semibold">Gespeichert!</div>}
             </div>
           </div>
           <div style={{ height: 64 }} />

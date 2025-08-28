@@ -79,6 +79,8 @@ export default function Home({ setTasting, participant, setParticipant }) {
       }
       setParticipant(name);
     }
+    // Bewertungen für diesen Teilnehmer merken
+    localStorage.setItem("wt_participant", name);
     nav(`/rate?c=${code}`);
   };
 

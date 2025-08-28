@@ -12,6 +12,7 @@ const AROMAS = [
 const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
 
 export default function Rate({ tasting, setTasting, participant, setParticipant, admin }) {
+  const [saved, setSaved] = useState(false);
   const nav = useNavigate();
 
   const drams = useMemo(() => [...(tasting.drams || [])].sort((a,b)=>a.order - b.order), [tasting.drams]);
@@ -20,7 +21,12 @@ export default function Rate({ tasting, setTasting, participant, setParticipant,
 
   // lokale Ratings (nur für UI); Server ist Quelle der Wahrheit für Leaderboard
   const [local, setLocal] = useState(tasting.ratings?.[participant] || {});
-  useEffect(() => { setLocal(tasting.ratings?.[participant] || {}); }, [participant, tasting.ratings]);
+  useEffect(() => {
+    // Wenn Ratings für diesen Teilnehmer existieren, lade sie in die Maske
+    if (tasting.ratings && participant && tasting.ratings[participant]) {
+      setLocal(tasting.ratings[participant]);
+    }
+  }, [participant, tasting.ratings]);
 
   const getR = (order) => local[order] || { points: 50, notes: "", aromas: [] };
   const setR = (order, patch) =>
@@ -35,18 +41,19 @@ export default function Rate({ tasting, setTasting, participant, setParticipant,
 
   const save = async () => {
     if (!participant.trim()) return;
-    // lokal
     setTasting(t => ({ ...t, ratings: { ...t.ratings, [participant.trim()]: local }}));
-
-    // an Server senden
+    let ok = true;
     if (tasting.id) {
       try {
         await submitRatings(tasting.id, participant.trim(), local);
       } catch (e) {
+        ok = false;
         console.error(e);
         alert("Senden an Server fehlgeschlagen, lokal gespeichert.");
       }
     }
+    setSaved(ok);
+    setTimeout(() => setSaved(false), 2000);
   };
 
   const prev = () => setIdx(i => clamp(i - 1, 0, drams.length - 1));
@@ -139,10 +146,11 @@ export default function Rate({ tasting, setTasting, participant, setParticipant,
       </Card>
 
       <div className="position-fixed bottom-0 start-0 end-0 p-2 bar-gradient">
-        <div className="mx-auto container-mobile d-flex">
+        <div className="mx-auto container-mobile d-flex flex-column align-items-center gap-2">
           <Button className="w-100 btn-cta" disabled={!participant.trim()} onClick={save}>
             🔒 Bewertung speichern
           </Button>
+          {saved && <div className="text-success fw-semibold">Gespeichert!</div>}
         </div>
       </div>
       <div style={{ height: 80 }} />
