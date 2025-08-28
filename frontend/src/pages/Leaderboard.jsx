@@ -68,56 +68,71 @@ export default function Leaderboard({ tasting, admin }) {
 
           {loading && <div className="text-center my-4"><Spinner animation="border" /></div>}
 
-          {!loading && rows.map((r, i) => {
-            // Filter nach Teilnehmer, falls ausgewählt
-            let avg = r.avgRank;
-            let count = r.count;
-            let notes = null;
-            let aromas = null;
-            if (selected !== 'all' && r.participants && r.participants[selected]) {
-              avg = r.participants[selected].avgRank;
-              count = r.participants[selected].count;
-              notes = r.participants[selected].notes;
-              aromas = r.participants[selected].aromas;
-            } else if (selected !== 'all') {
-              avg = null;
-              count = 0;
-              notes = null;
-              aromas = null;
+          {!loading && (() => {
+            let displayRows = rows;
+            if (selected !== 'all') {
+              // Sortiere nach persönlichem Rang (avgRank) für den Teilnehmer
+              displayRows = [...rows].sort((a, b) => {
+                const aRank = a.participants?.[selected]?.avgRank;
+                const bRank = b.participants?.[selected]?.avgRank;
+                // Null/undefined nach hinten
+                if (aRank == null && bRank == null) return 0;
+                if (aRank == null) return 1;
+                if (bRank == null) return -1;
+                return aRank - bRank;
+              });
             }
-            return (
-              <Card key={r.order} className="mb-3 shadow border-0">
-                <Card.Body>
-                  <div className="d-flex justify-content-between align-items-center mb-2">
-                    <div>
-                      <strong className="fs-5">
-                        #{i + 1} {r.name ? r.name : `Dram ${r.order}`}
-                      </strong>
-                      {r.broughtBy && (
-                        <div className="text-muted small">mitgebracht von {r.broughtBy}</div>
-                      )}
+            return displayRows.map((r, i) => {
+              // Filter nach Teilnehmer, falls ausgewählt
+              let avg = r.avgRank;
+              let count = r.count;
+              let notes = null;
+              let aromas = null;
+              if (selected !== 'all' && r.participants && r.participants[selected]) {
+                avg = r.participants[selected].avgRank;
+                count = r.participants[selected].count;
+                notes = r.participants[selected].notes;
+                aromas = r.participants[selected].aromas;
+              } else if (selected !== 'all') {
+                avg = null;
+                count = 0;
+                notes = null;
+                aromas = null;
+              }
+              return (
+                <Card key={r.order} className="mb-3 shadow border-0">
+                  <Card.Body>
+                    <div className="d-flex justify-content-between align-items-center mb-2">
+                      <div>
+                        <strong className="fs-5">
+                          #{i + 1} {r.name ? r.name : `Dram ${r.order}`}
+                        </strong>
+                        {r.broughtBy && (
+                          <div className="text-muted small">mitgebracht von {r.broughtBy}</div>
+                        )}
+                      </div>
+                      <div className="text-end">
+                        <div className="fs-5 fw-bold">{avg !== null && avg !== undefined ? Number(avg).toFixed(2) : "—"}</div>
+                        <small className="text-muted">Ø Rang · n={count ?? 0}</small>
+                      </div>
                     </div>
-                    <div className="text-end">
-                      <div className="fs-5 fw-bold">{avg !== null && avg !== undefined ? Number(avg).toFixed(2) : "—"}</div>
-                      <small className="text-muted">Ø Rang · n={count ?? 0}</small>
-                    </div>
-                  </div>
-                  {(aromas && aromas.length > 0) && (
-                    <div className="mb-2">
-                      {aromas.map((a, idx) => (
-                        <Badge key={idx} bg="warning" text="dark" className="me-1 mb-1">{a}</Badge>
-                      ))}
-                    </div>
-                  )}
-                  {notes && notes.trim() && (
-                    <div className="bg-light rounded p-2 mb-1 border fst-italic text-secondary small">
-                      {notes}
-                    </div>
-                  )}
-                </Card.Body>
-              </Card>
-            );
-          })}
+                    {(aromas && aromas.length > 0) && (
+                      <div className="mb-2">
+                        {aromas.map((a, idx) => (
+                          <Badge key={idx} bg="warning" text="dark" className="me-1 mb-1">{a}</Badge>
+                        ))}
+                      </div>
+                    )}
+                    {notes && notes.trim() && (
+                      <div className="bg-light rounded p-2 mb-1 border fst-italic text-secondary small">
+                        {notes}
+                      </div>
+                    )}
+                  </Card.Body>
+                </Card>
+              );
+            });
+          })()}
         </>
       )}
     </Container>
