@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Card, Form, Row, Col, Button, Container, InputGroup } from "react-bootstrap";
 import { createTasting, orgaLogin, setToken, toggleReleased, toggleCompleted, updateSetup } from "../api.js";
 
-export default function Setup({ tasting, setTasting, goRate, admin, setAdminState }) {
+export default function Setup({ tasting, setTasting, admin, setAdminState }) {
   const navigate = useNavigate();
   const [title, setTitle] = useState(tasting.title || "");
   const [host,  setHost]  = useState(tasting.host || "");

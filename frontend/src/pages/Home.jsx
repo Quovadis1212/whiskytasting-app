@@ -6,11 +6,9 @@ import { fetchActiveTastings, fetchCompletedTastings, fetchTastingByCode } from 
 export default function Home({ setTasting, participant, setParticipant }) {
   const [activeTastings, setActiveTastings] = useState([]);
   const [completedTastings, setCompletedTastings] = useState([]);
-  const [joinCode, setJoinCode] = useState("");
+  const [joinCode] = useState("");
   const [loading, setLoading] = useState(true);
   const [loadingCompleted, setLoadingCompleted] = useState(true);
-  const [joining, setJoining] = useState(false);
-  const [error, setError] = useState("");
   const nav = useNavigate();
 
   useEffect(() => {

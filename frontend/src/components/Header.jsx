@@ -1,15 +1,14 @@
 import { Navbar, Container, Badge, Nav } from "react-bootstrap";
 import { Link, useLocation } from "react-router-dom";
 
-export default function Header({ released, admin, tasting, onLeaveTasting }) {
+export default function Header({ released, admin, tasting }) {
   const location = useLocation();
 
-  let page = "";
   let activePath = "";
-  if (location.pathname.startsWith("/rate")) { page = "Bewertung"; activePath = "/rate"; }
-  else if (location.pathname.startsWith("/board")) { page = "Rangliste"; activePath = "/board"; }
-  else if (location.pathname.startsWith("/setup")) { page = "Setup"; activePath = "/setup"; }
-  else { page = "Home"; activePath = "/"; }
+  if (location.pathname.startsWith("/rate")) { activePath = "/rate"; }
+  else if (location.pathname.startsWith("/board")) { activePath = "/board"; }
+  else if (location.pathname.startsWith("/setup")) { activePath = "/setup"; }
+  else { activePath = "/"; }
 
   return (
     <Navbar variant="dark" sticky="top">

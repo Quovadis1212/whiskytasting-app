@@ -11,9 +11,8 @@ const AROMAS = [
 
 const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
 
-export default function Rate({ tasting, setTasting, participant, setParticipant, admin }) {
+export default function Rate({ tasting, setTasting, participant, setParticipant }) {
   const [saved, setSaved] = useState(false);
-  const nav = useNavigate();
 
   const drams = useMemo(() => [...(tasting.drams || [])].sort((a,b)=>a.order - b.order), [tasting.drams]);
   const [idx, setIdx] = useState(0);
@@ -81,9 +80,13 @@ export default function Rate({ tasting, setTasting, participant, setParticipant,
         </Card.Body>
       </Card>
 
-      {drams.length === 0 ? (
+      {tasting.completed ? (
+        <div className="alert alert-info text-center my-4">
+          Das Tasting wurde finalisiert.<br />Bewertungen sind nicht mehr möglich.
+        </div>
+      ) : drams.length === 0 ? (
         <div className="alert alert-warning text-center my-4">
-          Der Organisator muss erst noch die Drams erfassen.<br />Danach seite neu laden.
+          Der Organisator muss erst noch die Drams erfassen.<br />Danach Seite neu laden.
         </div>
       ) : (
         <>

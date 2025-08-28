@@ -271,15 +271,51 @@ router.get('/:id/leaderboard', orgaAuthOptional, async (req, res) => {
 
     const showResolution = t.released || req.isOrga;
 
+    // Teilnehmer-Liste extrahieren
+    const allParticipants = Object.keys(ratingsRoot);
+
     const rows = (t.drams || []).map(d => {
       const a = agg[d.order] || { sum: 0, count: 0 };
       const avgRank = a.count ? a.sum / a.count : null;
+      // Einzelwertungen pro Teilnehmer berechnen
+      const participants = {};
+      for (const pname of allParticipants) {
+        const per = mapToObj(ratingsRoot[pname]);
+        // Ranking für diesen Dram
+        const entries = Object.entries(per)
+          .filter(([, r]) => r && Number.isFinite(Number(r.points)))
+          .map(([order, r]) => ({ order: Number(order), points: Number(r.points), notes: r.notes, aromas: r.aromas }))
+          .sort((a, b) => b.points - a.points);
+        // Ranking berechnen
+        let i = 0;
+        let rank = null;
+        let notes = null;
+        let aromas = null;
+        while (i < entries.length) {
+          const start = i;
+          const p = entries[i].points;
+          while (i < entries.length && entries[i].points === p) i++;
+          const end = i - 1;
+          const avgRank = (start + 1 + (end + 1)) / 2;
+          for (let k = start; k <= end; k++) {
+            if (entries[k].order === d.order) {
+              rank = avgRank;
+              notes = entries[k].notes;
+              aromas = entries[k].aromas;
+            }
+          }
+        }
+        if (rank !== null) {
+          participants[pname] = { avgRank: rank, count: 1, notes, aromas };
+        }
+      }
       return {
         order: d.order,
         name: showResolution ? (d.name || '') : '',
         broughtBy: showResolution ? (d.broughtBy || '') : '',
         avgRank,
-        count: a.count
+        count: a.count,
+        participants
       };
     }).sort((x, y) => {
       if (x.avgRank === null && y.avgRank === null) return x.order - y.order;
@@ -290,7 +326,7 @@ router.get('/:id/leaderboard', orgaAuthOptional, async (req, res) => {
       return x.order - y.order;
     });
 
-    res.json({ released: t.released, rows });
+    res.json({ released: t.released, rows, participants: allParticipants });
   } catch (e) {
     console.error('leaderboard error:', e);
     res.status(500).json({ error: e.message });
