@@ -108,7 +108,7 @@ export default function Home({ setTasting, participant, setParticipant }) {
                 <Button
                   variant="outline-secondary"
                   size="sm"
-                  onClick={() => nav("/setup")}
+                  onClick={() => nav("/new")}
                 >
                   Neues Tasting
                 </Button>

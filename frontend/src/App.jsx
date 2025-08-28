@@ -4,6 +4,7 @@ import Header from "./components/Header.jsx";
 import Footer from "./components/Footer.jsx";
 import Home from "./pages/Home.jsx";
 import Setup from "./pages/Setup.jsx";
+import NewTasting from "./pages/NewTasting.jsx";
 import Rate from "./pages/Rate.jsx";
 import Leaderboard from "./pages/Leaderboard.jsx";
 import { isAdmin, fetchTastingByCode, fetchTastingById } from "./api.js";
@@ -87,8 +88,9 @@ export default function App() {
           <Route path="/" element={
             <Home setTasting={setTasting}
                   participant={participant} setParticipant={setParticipant}
-                  currentTasting={tasting}/>
+            />
           }/>
+          <Route path="/new" element={<NewTasting />} />
           <Route path="/setup" element={
             <Setup tasting={tasting} setTasting={setTasting}
                    goRate={()=>nav("/rate")}
