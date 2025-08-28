@@ -8,7 +8,7 @@ const app = express();
 
 // Middleware
 app.use(express.json());
-app.use(cors({ origin: process.env.CORS_ORIGIN?.split(',') || true, credentials: true }));
+app.use(cors({ origin: process.env.CORS_ORIGIN?.split(','), credentials: true }));
 
 // Health
 app.get('/api/health', (_req, res) => res.json({ ok: true }));
