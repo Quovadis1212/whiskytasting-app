@@ -81,75 +81,82 @@ export default function Rate({ tasting, setTasting, participant, setParticipant,
         </Card.Body>
       </Card>
 
-      <div className="d-flex justify-content-between align-items-center mb-2">
-        <Button variant="outline-secondary" size="sm" onClick={prev} disabled={idx===0}>←</Button>
-        <div className="text-center">
-          <div className="fw-bold">{headline}</div>
-          {broughtBy && (
-            <div className="text-muted small">{broughtBy}</div>
-          )}
-          <div className="text-muted small">{idx+1} von {drams.length}</div>
-          {/* Blindmodus-Badge entfernt */}
+      {drams.length === 0 ? (
+        <div className="alert alert-warning text-center my-4">
+          Der Organisator muss erst noch die Drams erfassen.<br />Danach seite neu laden.
         </div>
-        <Button variant="outline-secondary" size="sm" onClick={next} disabled={idx===drams.length-1}>→</Button>
-      </div>
-
-      <Card className="mb-3 shadow-sm">
-        <Card.Body>
+      ) : (
+        <>
           <div className="d-flex justify-content-between align-items-center mb-2">
-            <div className="fw-semibold">Bewertung</div>
-            <div className="fs-4">{getR(current?.order)?.points ?? 50}</div>
+            <Button variant="outline-secondary" size="sm" onClick={prev} disabled={idx===0}>←</Button>
+            <div className="text-center">
+              <div className="fw-bold">{headline}</div>
+              {broughtBy && (
+                <div className="text-muted small">{broughtBy}</div>
+              )}
+              <div className="text-muted small">{idx+1} von {drams.length}</div>
+            </div>
+            <Button variant="outline-secondary" size="sm" onClick={next} disabled={idx===drams.length-1}>→</Button>
           </div>
-          <Form.Label className="small text-muted d-flex justify-content-between">
-            <span>0</span><span>50</span><span>100</span>
-          </Form.Label>
-          <Form.Range min={0} max={100}
-            value={getR(current?.order)?.points ?? 50}
-            onChange={(e)=> current && setR(current.order, { points: parseInt(e.target.value,10) })}
-          />
-        </Card.Body>
-      </Card>
 
-      <Card className="mb-3 shadow-sm">
-        <Card.Body>
-          <div className="fw-semibold mb-2">Aromen</div>
-          <ButtonGroup className="flex-wrap">
-            {AROMAS.map(a => {
-              const active = current ? (getR(current.order).aromas || []).includes(a) : false;
-              return (
-                <Button key={a} size="sm"
-                  variant={active ? "warning" : "outline-warning"}
-                  className="me-2 mb-2"
-                  onClick={()=> current && toggleAroma(current.order, a)}
-                >
-                  {a}
-                </Button>
-              );
-            })}
-          </ButtonGroup>
-        </Card.Body>
-      </Card>
+          <Card className="mb-3 shadow-sm">
+            <Card.Body>
+              <div className="d-flex justify-content-between align-items-center mb-2">
+                <div className="fw-semibold">Bewertung</div>
+                <div className="fs-4">{getR(current?.order)?.points ?? 50}</div>
+              </div>
+              <Form.Label className="small text-muted d-flex justify-content-between">
+                <span>0</span><span>50</span><span>100</span>
+              </Form.Label>
+              <Form.Range min={0} max={100}
+                value={getR(current?.order)?.points ?? 50}
+                onChange={(e)=> current && setR(current.order, { points: parseInt(e.target.value,10) })}
+              />
+            </Card.Body>
+          </Card>
 
-      <Card className="mb-3 shadow-sm">
-        <Card.Body>
-          <div className="fw-semibold mb-2">Notizen</div>
-          <Form.Control as="textarea" rows={4}
-            placeholder="Deine Gedanken zu diesem Dram…"
-            value={current ? getR(current.order).notes : ""}
-            onChange={(e)=> current && setR(current.order, { notes: e.target.value })}
-          />
-        </Card.Body>
-      </Card>
+          <Card className="mb-3 shadow-sm">
+            <Card.Body>
+              <div className="fw-semibold mb-2">Aromen</div>
+              <ButtonGroup className="flex-wrap">
+                {AROMAS.map(a => {
+                  const active = current ? (getR(current.order).aromas || []).includes(a) : false;
+                  return (
+                    <Button key={a} size="sm"
+                      variant={active ? "warning" : "outline-warning"}
+                      className="me-2 mb-2"
+                      onClick={()=> current && toggleAroma(current.order, a)}
+                    >
+                      {a}
+                    </Button>
+                  );
+                })}
+              </ButtonGroup>
+            </Card.Body>
+          </Card>
 
-      <div className="position-fixed bottom-0 start-0 end-0 p-2 bar-gradient">
-        <div className="mx-auto container-mobile d-flex flex-column align-items-center gap-2">
-          <Button className="w-100 btn-cta" disabled={!participant.trim()} onClick={save}>
-            🔒 Bewertung speichern
-          </Button>
-          {saved && <div className="text-success fw-semibold">Gespeichert!</div>}
-        </div>
-      </div>
-      <div style={{ height: 80 }} />
+          <Card className="mb-3 shadow-sm">
+            <Card.Body>
+              <div className="fw-semibold mb-2">Notizen</div>
+              <Form.Control as="textarea" rows={4}
+                placeholder="Deine Gedanken zu diesem Dram…"
+                value={current ? getR(current.order).notes : ""}
+                onChange={(e)=> current && setR(current.order, { notes: e.target.value })}
+              />
+            </Card.Body>
+          </Card>
+
+          <div className="position-fixed bottom-0 start-0 end-0 p-2 bar-gradient">
+            <div className="mx-auto container-mobile d-flex flex-column align-items-center gap-2">
+              <Button className="w-100 btn-cta" disabled={!participant.trim()} onClick={save}>
+                🔒 Bewertung speichern
+              </Button>
+              {saved && <div className="text-success fw-semibold">Gespeichert!</div>}
+            </div>
+          </div>
+          <div style={{ height: 80 }} />
+        </>
+      )}
     </Container>
   );
 }
