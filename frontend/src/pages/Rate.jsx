@@ -3,6 +3,16 @@ import { Container, Card, Button, Row, Col, Form, ButtonGroup, Badge } from "rea
 import { useNavigate } from "react-router-dom";
 import { submitRatings } from "../api.js";
 
+// Redirect to Home if no tasting is loaded
+function useRedirectIfNoTasting(tasting) {
+  const nav = useNavigate();
+  useEffect(() => {
+    if (!tasting?.id) {
+      nav("/", { replace: true });
+    }
+  }, [tasting?.id, nav]);
+}
+
 const AROMAS = [
   "Fruchtig", "Vanille", "Karamell", "Honig", "Würzig", "Rauchig",
   "Torf", "Blumig", "Nussig", "Zitrus", "Obst",
@@ -12,6 +22,7 @@ const AROMAS = [
 const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
 
 export default function Rate({ tasting, setTasting, participant, setParticipant }) {
+  useRedirectIfNoTasting(tasting);
   const [saved, setSaved] = useState(false);
 
   const drams = useMemo(() => [...(tasting.drams || [])].sort((a,b)=>a.order - b.order), [tasting.drams]);
