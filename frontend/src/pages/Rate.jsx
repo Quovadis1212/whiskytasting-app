@@ -12,7 +12,6 @@ function useRedirectIfNoTasting(tasting) {
     }
   }, [tasting?.id, nav]);
 }
-
 const AROMAS = [
   "Fruchtig", "Vanille", "Karamell", "Honig", "Würzig", "Rauchig",
   "Torf", "Blumig", "Nussig", "Zitrus", "Obst",
