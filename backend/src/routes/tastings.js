@@ -147,16 +147,22 @@ router.get('/:id', orgaAuthOptional, async (req, res) => {
 
     // joinCode sicherstellen (Backfill für alte Tastings)
     if (!t.joinCode) {
-        let code;
-        do { code = generateJoinCode(); } while (await Tasting.exists({ joinCode: code }));
-        t.joinCode = code;
-        await t.save();
-        t = await Tasting.findById(req.params.id).lean();
+      let code;
+      do { code = generateJoinCode(); } while (await Tasting.exists({ joinCode: code }));
+      t.joinCode = code;
+      await t.save();
+      t = await Tasting.findById(req.params.id).lean();
     } else {
-        t = t.toObject();
+      t = t.toObject();
     }
 
     const isOrgaForThis = req.isOrga;
+    const participant = req.query.participant;
+    let ratings = {};
+    if (participant && t.ratings) {
+      const root = mapToObj(t.ratings);
+      ratings = root[participant] ? mapToObj(root[participant]) : {};
+    }
     res.json({
       id: String(t._id),
       joinCode: t.joinCode || "",
@@ -167,7 +173,8 @@ router.get('/:id', orgaAuthOptional, async (req, res) => {
       drams: (t.drams || []).map(d => {
         if (!t.released && !isOrgaForThis) return { order: d.order, name: '', broughtBy: '' };
         return { order: d.order, name: d.name || '', broughtBy: d.broughtBy || '' };
-      })
+      }),
+      ratings
     });
   } catch (e) {
     res.status(500).json({ error: e.message });

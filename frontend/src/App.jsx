@@ -63,10 +63,10 @@ export default function App() {
       try {
         let data;
         if (code) data = await fetchTastingByCode(code);
-        else if (id) data = await fetchTastingById(id);
+        else if (id) data = await fetchTastingById(id, participant);
         else if (tasting?.id && tasting?.joinCode) {
           // Kein Code/ID in URL, aber Tasting in localStorage
-          data = await fetchTastingById(tasting.id);
+          data = await fetchTastingById(tasting.id, participant);
         }
         if (data) setTasting(t => ({ ...t, ...data })); // server truth
       } catch (e) {

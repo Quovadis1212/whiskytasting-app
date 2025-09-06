@@ -41,8 +41,11 @@ export async function fetchTastingByCode(code) {
   if (!res.ok) throw new Error(`fetch by code ${res.status}`);
   return res.json();
 }
-export async function fetchTastingById(id) {
-  const res = await fetch(`${API}/api/tastings/${id}`, { headers: authHeader() });
+export async function fetchTastingById(id, participant) {
+  const url = participant
+    ? `${API}/api/tastings/${id}?participant=${encodeURIComponent(participant)}`
+    : `${API}/api/tastings/${id}`;
+  const res = await fetch(url, { headers: authHeader() });
   if (!res.ok) throw new Error(`fetch by id ${res.status}`);
   return res.json();
 }

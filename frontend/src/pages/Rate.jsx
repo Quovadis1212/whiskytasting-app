@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Container, Card, Button, Row, Col, Form, ButtonGroup, Badge } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { submitRatings } from "../api.js";
+import { fetchTastingById } from "../api.js";
 
 // Redirect to Home if no tasting is loaded
 function useRedirectIfNoTasting(tasting) {
@@ -12,6 +13,7 @@ function useRedirectIfNoTasting(tasting) {
     }
   }, [tasting?.id, nav]);
 }
+
 const AROMAS = [
   "Fruchtig", "Vanille", "Karamell", "Honig", "Würzig", "Rauchig",
   "Torf", "Blumig", "Nussig", "Zitrus", "Obst",
@@ -32,17 +34,19 @@ export default function Rate({ tasting, setTasting, participant, setParticipant 
 
   // Lokale Ratings persistent und zuverlässig laden/speichern
   const LOCAL_RATINGS_KEY = `wt_ratings_${tasting.id}_${participant}`;
-  const [local, setLocal] = useState(() => {
-    // 1. Try localStorage (in case of reload)
-    if (tasting.id && participant) {
-      try {
-        const raw = localStorage.getItem(LOCAL_RATINGS_KEY);
-        if (raw) return JSON.parse(raw);
-      } catch {}
-    }
-    // 2. Fallback to tasting.ratings
-    return (tasting.ratings?.[participant]) || {};
-  });
+    const [local, setLocal] = useState({});
+    // Lokale Ratings: immer vom Backend holen, wenn participant sich ändert
+    useEffect(() => {
+      if (tasting.id && participant) {
+        fetchTastingById(tasting.id, participant)
+          .then(data => {
+            setLocal(data.ratings || {});
+          })
+          .catch(() => setLocal({}));
+      } else {
+        setLocal({});
+      }
+    }, [tasting.id, participant]);
 
   // Keep local ratings in sync with tasting/participant changes
   useEffect(() => {
