@@ -28,7 +28,9 @@ export default function App() {
     try {
       const raw = localStorage.getItem(TASTING_KEY);
       if (raw) return { ...emptyTasting, ...JSON.parse(raw) };
-    } catch {}
+    } catch {
+      // Optionally handle error here
+    }
     return emptyTasting;
   });
   const [participant, setParticipant] = useState(localStorage.getItem("wt_participant") || "");

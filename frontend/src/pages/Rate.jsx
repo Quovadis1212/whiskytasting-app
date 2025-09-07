@@ -63,7 +63,7 @@ export default function Rate({ tasting, setTasting, participant, setParticipant 
     } else {
       setLocal({});
     }
-    // eslint-disable-next-line
+  // Removed unused eslint-disable directive
   }, [tasting.id, tasting.ratings, participant]);
 
   // Persist local ratings to localStorage on change
@@ -71,7 +71,7 @@ export default function Rate({ tasting, setTasting, participant, setParticipant 
     if (tasting.id && participant) {
       localStorage.setItem(LOCAL_RATINGS_KEY, JSON.stringify(local));
     }
-  }, [local, tasting.id, participant]);
+  }, [local, tasting.id, participant, LOCAL_RATINGS_KEY]);
 
   const getR = (order) => local[order] || { points: 50, notes: "", aromas: [] };
   const setR = (order, patch) =>

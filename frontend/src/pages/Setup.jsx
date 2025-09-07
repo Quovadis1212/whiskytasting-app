@@ -1,10 +1,9 @@
 import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Card, Form, Row, Col, Button, Container, InputGroup } from "react-bootstrap";
-import { createTasting, orgaLogin, setToken, toggleReleased, toggleCompleted, updateSetup } from "../api.js";
+import { setToken, toggleReleased, toggleCompleted, updateSetup } from "../api.js";
 
 export default function Setup({ tasting, setTasting, admin, setAdminState }) {
-  const navigate = useNavigate();
+  // Removed unused variable 'navigate' to fix lint error
   const [title, setTitle] = useState(tasting.title || "");
   const [host,  setHost]  = useState(tasting.host || "");
   const [pin,   setPin]   = useState(""); // neue PIN setzen (optional bei Update)
@@ -32,16 +31,6 @@ export default function Setup({ tasting, setTasting, admin, setAdminState }) {
     catch { alert("Kopieren fehlgeschlagen."); }
   };
 
-  const handleOrgaLogin = async () => {
-    const entered = window.prompt("Orga‑PIN eingeben:");
-    if (!entered) return;
-    try {
-      await orgaLogin(tasting.id, entered);
-      setAdminState(true);
-      alert("Orga‑Modus aktiviert.");
-      window.location.reload(); // optional: neu laden, damit Auflösung sichtbar wird
-    } catch { alert("Falscher PIN."); }
-  };
 
   const handleToggleReleased = async () => {
     try {

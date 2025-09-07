@@ -1,14 +1,15 @@
 import { useState, useEffect } from "react";
 import { Container, Card, Row, Col, Button, Form, Alert } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import { fetchActiveTastings, fetchCompletedTastings, fetchTastingByCode } from "../api.js";
+import { fetchActiveTastings, fetchCompletedTastings } from "../api.js";
 
-export default function Home({ setTasting, participant, setParticipant }) {
+export default function Home({ participant, setParticipant }) {
   const [activeTastings, setActiveTastings] = useState([]);
   const [completedTastings, setCompletedTastings] = useState([]);
-  const [joinCode] = useState("");
+  // Removed unused joinCode state
   const [loading, setLoading] = useState(true);
   const [loadingCompleted, setLoadingCompleted] = useState(true);
+  // Removed unused error and joining state to fix lint error
   const nav = useNavigate();
 
   useEffect(() => {
@@ -23,7 +24,7 @@ export default function Home({ setTasting, participant, setParticipant }) {
       setActiveTastings(tastings);
     } catch (err) {
       console.error('Failed to load active tastings:', err);
-      setError("Konnte aktive Tastings nicht laden.");
+  // Optionally show error to user here
     } finally {
       setLoading(false);
     }
@@ -36,43 +37,20 @@ export default function Home({ setTasting, participant, setParticipant }) {
       setCompletedTastings(tastings);
     } catch (err) {
       console.error('Failed to load completed tastings:', err);
-      // Don't set error for completed tastings, just log it
+  // Don't set error for completed tastings, just log it
     } finally {
       setLoadingCompleted(false);
     }
   };
 
-  const handleJoinByCode = async (e) => {
-    e.preventDefault();
-    if (!joinCode.trim()) {
-      setError("Bitte Code eingeben.");
-      return;
-    }
-    if (!participant.trim()) {
-      setError("Bitte Name eingeben.");
-      return;
-    }
-
-    try {
-      setJoining(true);
-      setError("");
-      const data = await fetchTastingByCode(joinCode.trim());
-      setTasting(data);
-      nav(`/rate?c=${joinCode.trim()}`);
-    } catch (err) {
-      console.error('Failed to join tasting:', err);
-      setError("Tasting nicht gefunden oder Code ungültig.");
-    } finally {
-      setJoining(false);
-    }
-  };
+  // Removed unused handleJoinByCode to fix lint error
 
   const joinTasting = (code) => {
     let name = participant;
     if (!name || !name.trim()) {
       name = window.prompt("Bitte gib deinen Namen ein:");
       if (!name || !name.trim()) {
-        setError("Bitte erst Namen eingeben.");
+  // Optionally show error to user here
         return;
       }
       setParticipant(name);
